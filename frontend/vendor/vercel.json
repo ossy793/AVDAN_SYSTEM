@@ -1,5 +1,16 @@
 {
   "version": 2,
   "name": "avdan-vendor",
-  "rewrites": [{ "source": "/", "destination": "/index.html" }]
+  "rewrites": [{ "source": "/", "destination": "/index.html" }],
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "Content-Security-Policy",
+          "value": "default-src 'self' https://avdan-system.vercel.app; script-src 'self' 'unsafe-inline' https://avdan-system.vercel.app https://unpkg.com; style-src 'self' 'unsafe-inline' https://avdan-system.vercel.app https://unpkg.com; img-src 'self' data: blob: https: http:; connect-src 'self' https://avdan-system.onrender.com https://nominatim.openstreetmap.org; font-src 'self' https://avdan-system.vercel.app; worker-src blob:;"
+        }
+      ]
+    }
+  ]
 }
