@@ -56,10 +56,61 @@ logger = logging.getLogger(__name__)
 
 
 # ── Lifespan ──────────────────────────────────────────────────────────────────
+async def _seed_admin() -> None:
+    """
+    If ADMIN_EMAIL and ADMIN_PASSWORD are set in the environment,
+    create the admin account on first boot if it doesn't already exist.
+    Safe to run repeatedly — skips silently if email already exists.
+    """
+    import os, uuid, bcrypt
+    from datetime import datetime, timezone
+    from sqlalchemy import text
+    from app.database import AsyncSessionLocal
+
+    email    = os.environ.get("ADMIN_EMAIL", "").strip().lower()
+    password = os.environ.get("ADMIN_PASSWORD", "").strip()
+    if not email or not password:
+        return
+
+    async with AsyncSessionLocal() as db:
+        row = (await db.execute(
+            text("SELECT id FROM users WHERE email = :e"), {"e": email}
+        )).fetchone()
+        if row:
+            return  # already exists
+
+        pw_hash = bcrypt.hashpw(password.encode(), bcrypt.gensalt()).decode()
+        user_id = uuid.uuid4()
+        now = datetime.now(tz=timezone.utc)
+        first = os.environ.get("ADMIN_FIRST_NAME", "Admin")
+        last  = os.environ.get("ADMIN_LAST_NAME", "User")
+        phone = os.environ.get("ADMIN_PHONE", "+2340000000000")
+
+        await db.execute(text("""
+            INSERT INTO users
+                (id, email, phone, first_name, last_name,
+                 password_hash, role, extra_roles, is_active, is_verified,
+                 created_at, updated_at)
+            VALUES
+                (:id, :email, :phone, :first, :last,
+                 :pw, 'admin', '{}', true, true, :now, :now)
+        """), {"id": str(user_id), "email": email, "phone": phone,
+               "first": first, "last": last, "pw": pw_hash, "now": now})
+
+        await db.execute(text("""
+            INSERT INTO wallets (id, user_id, balance, ledger_balance, currency, updated_at)
+            VALUES (:id, :uid, 0, 0, 'NGN', :now)
+        """), {"id": str(uuid.uuid4()), "uid": str(user_id), "now": now})
+
+        await db.commit()
+        logger.info("Admin account created for %s", email)
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     logger.info("ADVAN Platform starting up…")
     await init_db()
+    await _seed_admin()
     yield
     logger.info("ADVAN Platform shutting down.")
 
