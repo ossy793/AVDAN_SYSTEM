@@ -1,0 +1,18 @@
+{
+  "version": 2,
+  "name": "avdan-rider",
+  "buildCommand": "sed -i 's|../shared/|https://avdan-shared.vercel.app/|g' index.html",
+  "outputDirectory": ".",
+  "rewrites": [
+    { "source": "/", "destination": "/index.html" }
+  ],
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        { "key": "X-Content-Type-Options", "value": "nosniff" },
+        { "key": "X-Frame-Options", "value": "DENY" }
+      ]
+    }
+  ]
+}
