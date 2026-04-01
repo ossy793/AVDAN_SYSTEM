@@ -359,7 +359,7 @@ function _setImagePreview(url) {
       ? window.API_BASE_URL.replace('/api', '')
       : (location.hostname === 'localhost' || location.hostname === '127.0.0.1'
           ? 'http://127.0.0.1:8000'
-          : 'https://avdan-backend.onrender.com');
+          : 'https://avdan-system.onrender.com');
     img.src = url.startsWith('http') ? url : `${backendBase}${url}`;
     wrap.style.display = 'block';
   } else {

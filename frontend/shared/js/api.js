@@ -12,7 +12,7 @@ const API_BASE = (
   document.querySelector('meta[name="api-base"]')?.content ||
   (location.hostname === 'localhost' || location.hostname === '127.0.0.1'
     ? 'http://127.0.0.1:8000/api'
-    : 'https://avdan-backend.onrender.com/api')
+    : 'https://avdan-system.onrender.com/api')
 );
 
 const api = (() => {
