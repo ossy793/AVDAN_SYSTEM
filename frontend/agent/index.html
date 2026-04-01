@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AVDAN — Agent Hub</title>
+  <link rel="stylesheet" href="../shared/css/common.css" />
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+</head>
+<body>
+
+<div id="auth-gate" class="auth-page">
+  <div class="auth-card">
+    <div class="auth-logo">
+      <img src="../shared/img/logo.svg" class="auth-logo-img" alt="AVDAN" />
+      <div class="tagline">Agent Hub Portal</div>
+    </div>
+    <div id="auth-alert"></div>
+
+    <!-- Login Form -->
+    <div id="login-form">
+      <h2 class="auth-title">Hub Agent Sign In</h2>
+      <p class="auth-subtitle">Verify and dispatch packages</p>
+      <form id="loginForm">
+        <div class="form-group">
+          <label class="form-label">Email</label>
+          <input type="email" id="loginEmail" class="form-control" required />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Password</label>
+          <input type="password" id="loginPassword" class="form-control" required />
+        </div>
+        <button type="submit" class="btn btn-primary btn-full btn-lg">Sign In</button>
+      </form>
+      <p class="mt-md text-sm text-muted" style="text-align:center">
+        New agent? <a href="#" id="showRegister">Register here</a>
+      </p>
+    </div>
+
+    <!-- Register Form -->
+    <div id="register-form" class="hidden">
+      <h2 class="auth-title">Register as Agent</h2>
+      <p class="auth-subtitle">Join the AVDAN hub network</p>
+      <form id="registerForm">
+        <div class="flex gap-sm">
+          <div class="form-group" style="flex:1">
+            <label class="form-label">First name</label>
+            <input type="text" id="regFirst" class="form-control" required />
+          </div>
+          <div class="form-group" style="flex:1">
+            <label class="form-label">Last name</label>
+            <input type="text" id="regLast" class="form-control" required />
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Email</label>
+          <input type="email" id="regEmail" class="form-control" required />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Phone number</label>
+          <input type="tel" id="regPhone" class="form-control" placeholder="+2348012345678" required />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Password</label>
+          <input type="password" id="regPassword" class="form-control" placeholder="Min. 8 chars, 1 uppercase, 1 number" required />
+        </div>
+        <button type="submit" class="btn btn-primary btn-full btn-lg">Create Account</button>
+      </form>
+      <p class="mt-md text-sm text-muted" style="text-align:center">
+        Already registered? <a href="#" id="showLogin">Sign in</a>
+      </p>
+    </div>
+  </div>
+</div>
+
+<div id="app" class="app-shell hidden">
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <div>
+        <img src="../shared/img/logo.svg" class="sidebar-logo-img" alt="AVDAN" />
+        <div class="role-badge">Agent Hub</div>
+      </div>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-section-title">Operations</div>
+      <button class="nav-item active" data-page="page-dashboard" onclick="navigate('page-dashboard')"><span class="icon">🏠</span> Dashboard</button>
+      <button class="nav-item" data-page="page-incoming" onclick="loadIncoming(); navigate('page-incoming')"><span class="icon">📥</span> Incoming</button>
+      <button class="nav-item" data-page="page-verify" onclick="loadToVerify(); navigate('page-verify')"><span class="icon">✅</span> Verify Queue</button>
+      <button class="nav-item" data-page="page-dispatch" onclick="loadDispatchQueue(); navigate('page-dispatch')"><span class="icon">🗺️</span> Dispatch Queue</button>
+      <button class="nav-item" data-page="page-dispatched" onclick="loadDispatched(); navigate('page-dispatched')"><span class="icon">🚀</span> Dispatched</button>
+      <div class="nav-section-title">Communication</div>
+      <button class="nav-item" data-page="page-messages" onclick="navigate('page-messages')"><span class="icon">💬</span> Messages</button>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="sidebar-user">
+        <div class="avatar" id="user-avatar">A</div>
+        <div>
+          <div class="name" id="user-name">Loading…</div>
+          <div class="email" id="hub-name"></div>
+        </div>
+      </div>
+      <button class="btn btn-ghost btn-sm btn-full mt-md" onclick="logout()">Sign out</button>
+    </div>
+  </aside>
+
+  <main class="main-content">
+    <header class="topbar">
+      <button class="sidebar-toggle" onclick="toggleSidebar()" aria-label="Toggle sidebar">
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+          <line x1="3" y1="5" x2="17" y2="5"/><line x1="3" y1="10" x2="17" y2="10"/><line x1="3" y1="15" x2="17" y2="15"/>
+        </svg>
+      </button>
+      <span class="topbar-title" id="topbar-title">Dashboard</span>
+    </header>
+
+    <!-- Dashboard -->
+    <section id="page-dashboard" class="page active">
+      <div class="page-header"><h1 class="page-title">Hub Operations</h1></div>
+      <div class="stats-grid">
+        <div class="stat-card"><div class="stat-icon">📥</div><div class="stat-value" id="stat-incoming">—</div><div class="stat-label">Incoming Today</div></div>
+        <div class="stat-card amber"><div class="stat-icon" style="background:rgba(217,119,6,.1)">⏳</div><div class="stat-value" id="stat-pending">—</div><div class="stat-label">Pending Verification</div></div>
+        <div class="stat-card green"><div class="stat-icon" style="background:rgba(22,163,74,.1)">✅</div><div class="stat-value" id="stat-verified">—</div><div class="stat-label">Verified Today</div></div>
+        <div class="stat-card blue"><div class="stat-icon" style="background:rgba(37,99,235,.1)">🚀</div><div class="stat-value" id="stat-dispatched">—</div><div class="stat-label">Dispatched Today</div></div>
+      </div>
+      <div class="card">
+        <div class="card-header"><span class="card-title">Pending Verification — Action Required</span></div>
+        <div id="verify-queue-preview"><div class="spinner"></div></div>
+      </div>
+    </section>
+
+    <!-- Incoming -->
+    <section id="page-incoming" class="page">
+      <div class="page-header"><h1 class="page-title">Incoming Packages</h1></div>
+      <div id="incoming-list"><div class="spinner"></div></div>
+    </section>
+
+    <!-- Verify Queue -->
+    <section id="page-verify" class="page">
+      <div class="page-header">
+        <h1 class="page-title">Verify Queue</h1>
+        <div class="text-sm text-muted">Physically check each package against the order manifest before verifying.</div>
+      </div>
+      <div id="verify-list"><div class="spinner"></div></div>
+    </section>
+
+    <!-- Dispatch Queue (hub_verified — assign rider + map) -->
+    <section id="page-dispatch" class="page">
+      <div class="page-header">
+        <h1 class="page-title">Dispatch Queue</h1>
+        <div class="text-sm text-muted">Assign an available rider to each verified order for last-mile delivery.</div>
+      </div>
+      <div id="dispatch-list"><div class="spinner"></div></div>
+    </section>
+
+    <!-- Dispatched -->
+    <section id="page-dispatched" class="page">
+      <div class="page-header"><h1 class="page-title">Dispatched</h1></div>
+      <div id="dispatched-list"><div class="spinner"></div></div>
+    </section>
+
+    <!-- Messages -->
+    <section id="page-messages" class="page">
+      <div class="page-header"><h1 class="page-title">Messages</h1></div>
+      <div class="card">
+        <div class="form-group">
+          <label class="form-label">Order Reference</label>
+          <div class="flex gap-sm">
+            <input type="text" id="msgOrderId" class="form-control" placeholder="Order UUID" />
+            <button class="btn btn-primary" onclick="loadOrderMessages()">Load</button>
+          </div>
+        </div>
+        <div id="messages-container"></div>
+        <div id="message-compose" class="hidden">
+          <textarea id="msgContent" class="form-control" rows="2" placeholder="Type a message…"></textarea>
+          <button class="btn btn-primary mt-md" onclick="sendMessage()">Send</button>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<!-- ── Order Detail Modal ──────────────────────────────────────────────────── -->
+<div id="order-modal" class="modal-overlay" style="display:none">
+  <div class="modal" style="max-width:700px;width:100%;max-height:90vh;overflow-y:auto">
+    <div class="modal-header">
+      <span class="modal-title" id="modal-order-ref">Order Details</span>
+      <button class="modal-close" onclick="closeOrderModal()">✕</button>
+    </div>
+
+    <!-- Order meta -->
+    <div id="modal-order-meta"></div>
+
+    <!-- Delivery Map -->
+    <div id="modal-map-wrap" class="hidden" style="margin-top:16px">
+      <div class="form-label" style="margin-bottom:6px">Delivery Location</div>
+      <div id="order-detail-map" style="height:260px;border-radius:var(--radius-lg);overflow:hidden;border:1px solid var(--color-border)"></div>
+    </div>
+    <div id="modal-no-map" class="hidden">
+      <div class="alert" style="background:var(--color-surface-2);color:var(--color-muted);margin-top:12px;font-size:var(--text-sm)">
+        No GPS coordinates — delivery address only.
+      </div>
+    </div>
+
+    <!-- Order items -->
+    <div id="modal-order-items" style="margin-top:16px"></div>
+
+    <!-- Rider Assignment (shown only for hub_verified) -->
+    <div id="modal-rider-section" class="hidden" style="margin-top:16px">
+      <hr style="border-color:var(--color-border);margin-bottom:16px" />
+      <h4 style="margin-bottom:12px">Assign Delivery Rider</h4>
+      <div id="modal-rider-alert"></div>
+      <div class="flex gap-sm" style="align-items:flex-end">
+        <div style="flex:1">
+          <label class="form-label">Available Riders</label>
+          <select id="riderSelect" class="form-control">
+            <option value="">Loading riders…</option>
+          </select>
+        </div>
+        <button class="btn btn-primary" onclick="doAssignRider()" id="assignRiderBtn">Assign Rider</button>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeOrderModal()">Close</button>
+    </div>
+  </div>
+</div>
+
+<div class="sidebar-backdrop" id="sidebar-backdrop"></div>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="../shared/js/api.js"></script>
+<script src="js/app.js"></script>
+<script src="../shared/js/sidebar.js"></script>
+</body>
+</html>

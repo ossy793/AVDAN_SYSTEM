@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AVDAN — Admin Console</title>
+  <link rel="stylesheet" href="../shared/css/common.css" />
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+</head>
+<body>
+
+<div id="auth-gate" class="auth-page">
+  <div class="auth-card">
+    <div class="auth-logo">
+      <img src="../shared/img/logo.svg" class="auth-logo-img" alt="AVDAN" />
+      <div class="tagline">Admin Console</div>
+    </div>
+    <div id="auth-alert"></div>
+    <form id="loginForm">
+      <h2 class="auth-title">Admin Sign In</h2>
+      <div class="form-group"><label class="form-label">Email</label><input type="email" id="loginEmail" class="form-control" required /></div>
+      <div class="form-group"><label class="form-label">Password</label><input type="password" id="loginPassword" class="form-control" required /></div>
+      <button type="submit" class="btn btn-primary btn-full btn-lg">Sign In</button>
+    </form>
+  </div>
+</div>
+
+<div id="app" class="app-shell hidden">
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <div>
+        <img src="../shared/img/logo.svg" class="sidebar-logo-img" alt="AVDAN" />
+        <div class="role-badge">Admin</div>
+      </div>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-section-title">Analytics</div>
+      <button class="nav-item active" data-page="page-overview" onclick="loadOverview(); navigate('page-overview')"><span class="icon">📊</span> Overview</button>
+      <div class="nav-section-title">Users</div>
+      <button class="nav-item" data-page="page-users" onclick="loadUsers(); navigate('page-users')"><span class="icon">👥</span> All Users</button>
+      <button class="nav-item" data-page="page-vendors" onclick="loadVendors(); navigate('page-vendors')"><span class="icon">🏪</span> Vendors</button>
+      <button class="nav-item" data-page="page-riders" onclick="loadRiders(); navigate('page-riders')"><span class="icon">🚴</span> Riders</button>
+      <div class="nav-section-title">Operations</div>
+      <button class="nav-item" data-page="page-orders" onclick="loadOrders(); navigate('page-orders')"><span class="icon">📦</span> All Orders</button>
+      <button class="nav-item" data-page="page-payments" onclick="loadPayments(); navigate('page-payments')"><span class="icon">💳</span> Payments</button>
+      <button class="nav-item" data-page="page-hubs" onclick="loadHubs(); navigate('page-hubs')"><span class="icon">🏠</span> Agent Hubs</button>
+      <div class="nav-section-title">Escrow</div>
+      <button class="nav-item" data-page="page-escrow" onclick="loadEscrow(); navigate('page-escrow')"><span class="icon">🔒</span> Escrow Monitor</button>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="sidebar-user">
+        <div class="avatar" id="user-avatar">A</div>
+        <div>
+          <div class="name" id="user-name">Admin</div>
+          <div class="email" id="user-email"></div>
+        </div>
+      </div>
+      <button class="btn btn-ghost btn-sm btn-full mt-md" onclick="logout()">Sign out</button>
+    </div>
+  </aside>
+
+  <main class="main-content">
+    <header class="topbar">
+      <button class="sidebar-toggle" onclick="toggleSidebar()" aria-label="Toggle sidebar">
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+          <line x1="3" y1="5" x2="17" y2="5"/><line x1="3" y1="10" x2="17" y2="10"/><line x1="3" y1="15" x2="17" y2="15"/>
+        </svg>
+      </button>
+      <span class="topbar-title" id="topbar-title">Platform Overview</span>
+      <div class="topbar-actions">
+        <span class="badge badge-paid" id="last-refresh"></span>
+        <button class="btn btn-ghost btn-sm" onclick="refreshCurrent()">↻ Refresh</button>
+      </div>
+    </header>
+
+    <!-- Overview -->
+    <section id="page-overview" class="page active">
+      <div class="page-header"><h1 class="page-title">Platform Analytics</h1></div>
+      <div class="stats-grid" id="overview-stats"><div class="spinner"></div></div>
+      <div class="flex gap-md" style="flex-wrap:wrap">
+        <div class="card" style="flex:1;min-width:300px">
+          <div class="card-header"><span class="card-title">Recent Orders</span></div>
+          <div id="recent-orders"><div class="spinner"></div></div>
+        </div>
+        <div class="card" style="flex:1;min-width:300px">
+          <div class="card-header"><span class="card-title">Pending Vendor Approvals</span></div>
+          <div id="pending-vendors"><div class="spinner"></div></div>
+        </div>
+      </div>
+      <div class="card mt-md">
+        <div class="card-header">
+          <span class="card-title">Awaiting Rider Assignment</span>
+          <button class="btn btn-ghost btn-sm" onclick="loadOrders(); navigate('page-orders')">View All Orders</button>
+        </div>
+        <div id="awaiting-rider"><div class="spinner"></div></div>
+      </div>
+    </section>
+
+    <!-- Users -->
+    <section id="page-users" class="page">
+      <div class="page-header">
+        <h1 class="page-title">All Users</h1>
+        <select id="user-role-filter" class="form-control" style="width:160px" onchange="loadUsers()">
+          <option value="">All Roles</option>
+          <option value="customer">Customers</option>
+          <option value="vendor">Vendors</option>
+          <option value="rider">Riders</option>
+          <option value="agent">Agents</option>
+        </select>
+      </div>
+      <div id="users-table"><div class="spinner"></div></div>
+    </section>
+
+    <!-- Vendors -->
+    <section id="page-vendors" class="page">
+      <div class="page-header">
+        <h1 class="page-title">Vendors</h1>
+        <select id="vendor-filter" class="form-control" style="width:160px" onchange="loadVendors()">
+          <option value="">All</option>
+          <option value="false">Pending Approval</option>
+          <option value="true">Approved</option>
+        </select>
+      </div>
+      <div id="vendors-table"><div class="spinner"></div></div>
+    </section>
+
+    <!-- Riders -->
+    <section id="page-riders" class="page">
+      <div class="page-header"><h1 class="page-title">Riders</h1></div>
+      <div id="riders-table"><div class="spinner"></div></div>
+    </section>
+
+    <!-- Orders -->
+    <section id="page-orders" class="page">
+      <div class="page-header">
+        <h1 class="page-title">All Orders</h1>
+        <select id="orders-status-filter" class="form-control" style="width:180px" onchange="loadOrders()">
+          <option value="">All Statuses</option>
+          <option value="pending">Pending</option>
+          <option value="paid">Paid</option>
+          <option value="vendor_confirmed">Vendor Confirmed</option>
+          <option value="preparing">Preparing</option>
+          <option value="rider_assigned">Rider Assigned</option>
+          <option value="at_hub">At Hub</option>
+          <option value="in_transit">In Transit</option>
+          <option value="delivered">Delivered</option>
+          <option value="vendor_rejected">Vendor Rejected</option>
+          <option value="cancelled">Cancelled</option>
+          <option value="disputed">Disputed</option>
+        </select>
+      </div>
+      <div id="orders-table"><div class="spinner"></div></div>
+    </section>
+
+    <!-- Payments -->
+    <section id="page-payments" class="page">
+      <div class="page-header"><h1 class="page-title">Payments</h1></div>
+      <div id="payments-table"><div class="spinner"></div></div>
+    </section>
+
+    <!-- Hubs -->
+    <section id="page-hubs" class="page">
+      <div class="page-header">
+        <h1 class="page-title">Agent Hubs</h1>
+        <button class="btn btn-primary" onclick="openHubModal()">+ New Hub</button>
+      </div>
+      <div id="hubs-list"><div class="spinner"></div></div>
+    </section>
+
+    <!-- Escrow -->
+    <section id="page-escrow" class="page">
+      <div class="page-header"><h1 class="page-title">Escrow Monitor</h1></div>
+      <div id="escrow-table"><div class="spinner"></div></div>
+    </section>
+  </main>
+</div>
+
+<!-- Order Live Tracking Modal -->
+<div id="track-modal" class="modal-map-overlay" style="display:none">
+  <div class="modal-map-shell">
+    <!-- Info panel -->
+    <div class="modal-map-panel track-panel">
+      <div class="modal-map-panel-header">
+        <div>
+          <div class="modal-map-title">Order Tracking</div>
+          <div id="track-ref" class="modal-map-ref text-sm text-muted" style="font-family:var(--font-mono)"></div>
+        </div>
+        <button class="modal-close" onclick="closeTrackModal()">✕</button>
+      </div>
+
+      <div class="track-panel-body">
+        <!-- Status + amount -->
+        <div class="track-summary">
+          <div id="track-status-badge"></div>
+          <div id="track-amount" class="track-amount"></div>
+        </div>
+
+        <!-- Timeline -->
+        <div class="track-section-title">Timeline</div>
+        <ol class="track-timeline" id="track-timeline"></ol>
+
+        <!-- Actors -->
+        <div class="track-section-title">Actors</div>
+        <div id="track-actors"></div>
+
+        <!-- Items -->
+        <div class="track-section-title">Items</div>
+        <div id="track-items"></div>
+
+        <!-- Poll status -->
+        <div id="track-poll-status" class="text-sm text-muted" style="padding:8px 0;text-align:center"></div>
+      </div>
+    </div>
+    <!-- Map -->
+    <div class="modal-map-container">
+      <div id="track-map" style="width:100%;height:100%"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Assign Rider Map Modal -->
+<div id="assign-rider-modal" class="modal-map-overlay" style="display:none">
+  <div class="modal-map-shell">
+    <!-- Sidebar panel -->
+    <div class="modal-map-panel">
+      <div class="modal-map-panel-header">
+        <div>
+          <div class="modal-map-title">Assign Rider</div>
+          <div class="modal-map-ref text-sm text-muted">Order: <strong id="assign-order-ref" style="font-family:var(--font-mono)"></strong></div>
+        </div>
+        <button class="modal-close" onclick="closeAssignRiderModal()" style="flex-shrink:0">✕</button>
+      </div>
+      <div id="assign-modal-alert"></div>
+      <div id="assign-map-status" class="text-sm text-muted" style="padding:8px 0">Loading map data…</div>
+      <div id="assign-rider-list" class="assign-rider-list"></div>
+      <div class="modal-map-footer">
+        <button type="button" class="btn btn-ghost" onclick="closeAssignRiderModal()">Cancel</button>
+        <button type="button" class="btn btn-primary" id="assignRiderBtn" onclick="confirmAssignRider()" disabled>Assign Rider</button>
+      </div>
+    </div>
+    <!-- Map -->
+    <div class="modal-map-container">
+      <div id="assign-map" style="width:100%;height:100%"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Hub Modal -->
+<div id="hub-modal" class="modal-overlay">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title">Create Agent Hub</span>
+      <button class="modal-close" onclick="closeHubModal()">✕</button>
+    </div>
+    <div id="hub-modal-alert"></div>
+    <form id="hubForm">
+      <div class="form-group"><label class="form-label">Hub Name</label><input type="text" id="hubName" class="form-control" required /></div>
+      <div class="form-group"><label class="form-label">Address</label><textarea id="hubAddress" class="form-control" rows="2" required></textarea></div>
+      <div class="flex gap-sm">
+        <div class="form-group" style="flex:1"><label class="form-label">Area (e.g. Lekki)</label><input type="text" id="hubArea" class="form-control" /></div>
+        <div class="form-group" style="flex:1"><label class="form-label">Phone</label><input type="tel" id="hubPhone" class="form-control" /></div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Location <span class="text-muted" style="font-weight:400">(click map to pin)</span></label>
+        <div id="hub-map" style="height:220px;border-radius:var(--radius-md);border:1px solid var(--color-border);overflow:hidden"></div>
+        <div id="hub-map-coords" class="form-hint" style="margin-top:4px">No location selected</div>
+        <input type="hidden" id="hubLat" />
+        <input type="hidden" id="hubLng" />
+      </div>
+      <div class="form-group"><label class="form-label">Daily Capacity</label><input type="number" id="hubCapacity" class="form-control" value="100" /></div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-ghost" onclick="closeHubModal()">Cancel</button>
+        <button type="submit" class="btn btn-primary" id="hubSubmitBtn">Create Hub</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="sidebar-backdrop" id="sidebar-backdrop"></div>
+<script src="../shared/js/api.js"></script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="js/app.js"></script>
+<script src="../shared/js/sidebar.js"></script>
+</body>
+</html>

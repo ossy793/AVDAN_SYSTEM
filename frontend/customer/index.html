@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AVDAN — Customer Portal</title>
+  <link rel="stylesheet" href="../shared/css/common.css" />
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+</head>
+<body>
+
+<!-- ── Auth Gate ──────────────────────────────────────────────── -->
+<div id="auth-gate" class="auth-page">
+  <div class="auth-card">
+    <div class="auth-logo">
+      <img src="../shared/img/logo.svg" class="auth-logo-img" alt="AVDAN" />
+      <div class="tagline">Lagos Logistics & Marketplace</div>
+    </div>
+    <div id="auth-alert"></div>
+
+    <!-- Login Form -->
+    <div id="login-form">
+      <h2 class="auth-title">Welcome back</h2>
+      <p class="auth-subtitle">Sign in to your customer account</p>
+      <form id="loginForm">
+        <div class="form-group">
+          <label class="form-label">Email address</label>
+          <input type="email" id="loginEmail" class="form-control" placeholder="you@example.com" required />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Password</label>
+          <input type="password" id="loginPassword" class="form-control" placeholder="••••••••" required />
+        </div>
+        <button type="submit" class="btn btn-primary btn-full btn-lg">Sign In</button>
+      </form>
+      <p class="mt-md text-sm text-muted" style="text-align:center">
+        New customer? <a href="#" id="showRegister">Create account</a>
+      </p>
+    </div>
+
+    <!-- Register Form -->
+    <div id="register-form" class="hidden">
+      <h2 class="auth-title">Create account</h2>
+      <p class="auth-subtitle">Join AVDAN and start shopping</p>
+      <form id="registerForm">
+        <div class="flex gap-sm">
+          <div class="form-group" style="flex:1">
+            <label class="form-label">First name</label>
+            <input type="text" id="regFirst" class="form-control" required />
+          </div>
+          <div class="form-group" style="flex:1">
+            <label class="form-label">Last name</label>
+            <input type="text" id="regLast" class="form-control" required />
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Email address</label>
+          <input type="email" id="regEmail" class="form-control" required />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Phone number</label>
+          <input type="tel" id="regPhone" class="form-control" placeholder="+2348012345678" required />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Password</label>
+          <input type="password" id="regPassword" class="form-control" placeholder="Min. 8 chars, 1 uppercase, 1 number" required />
+        </div>
+        <button type="submit" class="btn btn-primary btn-full btn-lg">Create Account</button>
+      </form>
+      <p class="mt-md text-sm text-muted" style="text-align:center">
+        Already have an account? <a href="#" id="showLogin">Sign in</a>
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- ── App Shell ──────────────────────────────────────────────── -->
+<div id="app" class="app-shell hidden">
+
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <div>
+        <img src="../shared/img/logo.svg" class="sidebar-logo-img" alt="AVDAN" />
+        <div class="role-badge">Customer</div>
+      </div>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-section-title">Shop</div>
+      <button class="nav-item active" data-page="page-shop" onclick="navigate('page-shop')">
+        <span class="icon">🛍️</span> Browse Products
+      </button>
+      <button class="nav-item" data-page="page-cart" onclick="navigate('page-cart')">
+        <span class="icon">🛒</span> Cart <span id="cart-count-badge" class="badge badge-paid" style="margin-left:auto"></span>
+      </button>
+      <div class="nav-section-title">Orders</div>
+      <button class="nav-item" data-page="page-orders" onclick="loadOrders(); navigate('page-orders')">
+        <span class="icon">📦</span> My Orders
+      </button>
+      <button class="nav-item" data-page="page-track" onclick="navigate('page-track')">
+        <span class="icon">📍</span> Track Order
+      </button>
+      <div class="nav-section-title">Account</div>
+      <button class="nav-item" data-page="page-wallet" onclick="loadWallet(); navigate('page-wallet')">
+        <span class="icon">💰</span> Wallet
+      </button>
+      <button class="nav-item" data-page="page-notifications" onclick="loadNotifications(); navigate('page-notifications')">
+        <span class="icon">🔔</span> Notifications
+      </button>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="sidebar-user">
+        <div class="avatar" id="user-avatar">?</div>
+        <div>
+          <div class="name" id="user-name">Loading…</div>
+          <div class="email" id="user-email"></div>
+        </div>
+      </div>
+      <button class="btn btn-ghost btn-sm btn-full mt-md" onclick="logout()">Sign out</button>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <main class="main-content">
+    <header class="topbar">
+      <button class="sidebar-toggle" onclick="toggleSidebar()" aria-label="Toggle sidebar">
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+          <line x1="3" y1="5" x2="17" y2="5"/><line x1="3" y1="10" x2="17" y2="10"/><line x1="3" y1="15" x2="17" y2="15"/>
+        </svg>
+      </button>
+      <span class="topbar-title" id="topbar-title">Browse Products</span>
+      <div class="topbar-actions">
+        <button class="btn btn-ghost btn-sm" onclick="loadNotifications(); navigate('page-notifications')">🔔</button>
+        <button class="btn btn-primary btn-sm" onclick="navigate('page-cart')">🛒 Cart (<span id="cart-count">0</span>)</button>
+      </div>
+    </header>
+
+    <!-- ── Shop Page ─────────────────────────────────────────── -->
+    <section id="page-shop" class="page active">
+      <div class="page-header">
+        <h1 class="page-title">Browse Products</h1>
+        <div class="flex gap-sm">
+          <input type="text" id="searchInput" class="form-control" placeholder="Search products…" style="width:220px" oninput="filterProducts()" />
+          <select id="categoryFilter" class="form-control" style="width:160px" onchange="filterProducts()">
+            <option value="">All Categories</option>
+            <option value="food">Food</option>
+            <option value="groceries">Groceries</option>
+            <option value="electronics">Electronics</option>
+            <option value="fashion">Fashion</option>
+            <option value="health">Health</option>
+            <option value="home">Home</option>
+            <option value="beauty">Beauty</option>
+            <option value="other">Other</option>
+          </select>
+        </div>
+      </div>
+      <div id="products-grid" class="products-grid">
+        <div class="spinner"></div>
+      </div>
+    </section>
+
+    <!-- ── Cart Page ─────────────────────────────────────────── -->
+    <section id="page-cart" class="page">
+      <div class="page-header">
+        <h1 class="page-title">Your Cart</h1>
+        <button class="btn btn-ghost btn-sm" onclick="clearCart()">Clear Cart</button>
+      </div>
+      <div id="cart-alert"></div>
+      <div class="flex gap-md" style="align-items:flex-start;flex-wrap:wrap">
+        <div style="flex:2;min-width:300px">
+          <div class="card">
+            <div id="cart-items-list">
+              <div class="empty-state"><div class="icon">🛒</div><h3>Your cart is empty</h3></div>
+            </div>
+          </div>
+        </div>
+        <div style="flex:1;min-width:260px">
+          <div class="card">
+            <h3 class="card-title mb-md">Order Summary</h3>
+            <div id="order-summary-details">
+              <div class="flex justify-between mb-md"><span class="text-muted">Subtotal</span><span id="summary-subtotal">₦0.00</span></div>
+              <div class="flex justify-between mb-md"><span class="text-muted">Delivery fee</span><span>₦500.00</span></div>
+              <div class="flex justify-between mb-md"><span class="text-muted">Hub fee</span><span>₦100.00</span></div>
+              <div class="flex justify-between mb-md"><span class="text-muted">Platform fee (5%)</span><span id="summary-platform">₦0.00</span></div>
+              <hr style="margin:12px 0;border-color:var(--color-border)"/>
+              <div class="flex justify-between font-bold"><span>Total</span><span id="summary-total" style="color:var(--color-primary)">₦0.00</span></div>
+            </div>
+            <!-- ── Delivery Location ──────────────────────────────── -->
+            <div class="form-group mt-md">
+              <label class="form-label">Delivery Location</label>
+
+              <!-- Search bar -->
+              <div class="location-search-wrap">
+                <input
+                  type="text"
+                  id="locationSearch"
+                  class="form-control"
+                  placeholder="Search address, area or landmark…"
+                  autocomplete="off"
+                  oninput="onLocationInput()"
+                  onfocus="onLocationInput()"
+                />
+                <div id="search-suggestions" class="search-suggestions hidden"></div>
+              </div>
+
+              <!-- Current location button -->
+              <button
+                type="button"
+                id="useLocationBtn"
+                class="btn btn-ghost btn-sm"
+                style="margin-top:8px;width:100%"
+                onclick="useCurrentLocation()"
+              >
+                📍 Use My Current Location
+              </button>
+
+              <!-- Interactive map -->
+              <div id="delivery-map" class="delivery-map-container"></div>
+
+              <!-- Confirmed location display -->
+              <div id="location-confirmed" class="location-confirmed hidden">
+                <span id="location-confirmed-text"></span>
+                <span id="location-coords" class="location-coords"></span>
+              </div>
+
+              <!-- Error / hint -->
+              <div id="location-error" class="hidden" style="font-size:var(--text-sm);color:var(--color-danger);margin-top:4px"></div>
+            </div>
+
+            <!-- Hidden fields consumed by placeOrder() -->
+            <input type="hidden" id="deliveryAddress" />
+            <input type="hidden" id="deliveryLat" />
+            <input type="hidden" id="deliveryLng" />
+
+            <button class="btn btn-primary btn-full btn-lg" id="placeOrderBtn" onclick="placeOrder()">
+              Place Order & Pay
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Orders Page ────────────────────────────────────────── -->
+    <section id="page-orders" class="page">
+      <div class="page-header">
+        <h1 class="page-title">My Orders</h1>
+      </div>
+      <div id="orders-list">
+        <div class="spinner"></div>
+      </div>
+    </section>
+
+    <!-- ── Track Page ─────────────────────────────────────────── -->
+    <section id="page-track" class="page">
+      <div class="page-header">
+        <h1 class="page-title">Track Order</h1>
+      </div>
+      <div class="card mb-md">
+        <div class="flex gap-sm">
+          <input type="text" id="trackInput" class="form-control" placeholder="Order reference e.g. ADV-20240101-ABCDE" />
+          <button class="btn btn-primary" onclick="trackOrder()">Track</button>
+        </div>
+      </div>
+      <div id="track-result"></div>
+      <div id="map" class="hidden mt-md"></div>
+    </section>
+
+    <!-- ── Wallet Page ────────────────────────────────────────── -->
+    <section id="page-wallet" class="page">
+      <div class="page-header">
+        <h1 class="page-title">My Wallet</h1>
+      </div>
+      <div id="wallet-details">
+        <div class="spinner"></div>
+      </div>
+    </section>
+
+    <!-- ── Notifications Page ─────────────────────────────────── -->
+    <section id="page-notifications" class="page">
+      <div class="page-header">
+        <h1 class="page-title">Notifications</h1>
+        <button class="btn btn-ghost btn-sm" onclick="markAllRead()">Mark all read</button>
+      </div>
+      <div id="notifications-list">
+        <div class="spinner"></div>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<div class="sidebar-backdrop" id="sidebar-backdrop"></div>
+<script src="../shared/js/api.js"></script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="js/app.js"></script>
+<script src="../shared/js/sidebar.js"></script>
+</body>
+</html>

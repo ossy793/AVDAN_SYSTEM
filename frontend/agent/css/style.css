@@ -1,0 +1,48 @@
+/* Agent Hub Portal styles */
+.package-card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-lg);
+  margin-bottom: var(--space-md);
+  box-shadow: var(--shadow-sm);
+}
+.package-card.urgent { border-left: 4px solid var(--color-danger); }
+.package-card.verified { border-left: 4px solid var(--color-success); }
+.package-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-md);
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.package-ref {
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  font-weight: 700;
+  background: var(--color-bg);
+  padding: 4px 12px;
+  border-radius: var(--radius-md);
+}
+.package-items {
+  background: var(--color-bg);
+  border-radius: var(--radius-md);
+  padding: var(--space-md);
+  margin: var(--space-md) 0;
+}
+.package-actions {
+  display: flex;
+  gap: var(--space-sm);
+  flex-wrap: wrap;
+  margin-top: var(--space-md);
+}
+.message-bubble {
+  padding: 10px 16px;
+  border-radius: var(--radius-lg);
+  margin-bottom: 8px;
+  max-width: 80%;
+  font-size: var(--text-sm);
+}
+.message-sent { background: var(--color-primary); color: #fff; margin-left: auto; }
+.message-received { background: var(--color-bg); }

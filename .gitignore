@@ -1,0 +1,47 @@
+# ── Python ────────────────────────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.pycache
+*.egg-info/
+dist/
+build/
+*.egg
+
+# ── Virtual environment ───────────────────────────────────────────────────────
+venv/
+.venv/
+env/
+.env_backup
+
+# ── Environment / secrets ─────────────────────────────────────────────────────
+backend/.env
+*.env
+!backend/.env.example
+
+# ── Logs ──────────────────────────────────────────────────────────────────────
+backend/logs/
+*.log
+
+# ── Uploads (user-generated files — use cloud storage in production) ──────────
+backend/uploads/products/
+
+# ── Database ──────────────────────────────────────────────────────────────────
+*.db
+*.sqlite3
+
+# ── OS & editor ───────────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+desktop.ini
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# ── Alembic generated versions (keep only if you use alembic) ─────────────────
+# alembic/versions/
+
+# ── Node (not used here, but guard in case) ───────────────────────────────────
+node_modules/

@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AVDAN — Rider App</title>
+  <link rel="stylesheet" href="../shared/css/common.css" />
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+</head>
+<body>
+
+<!-- Auth Gate -->
+<div id="auth-gate" class="auth-page">
+  <div class="auth-card">
+    <div class="auth-logo">
+      <img src="../shared/img/logo.svg" class="auth-logo-img" alt="AVDAN" />
+      <div class="tagline">Rider Dashboard</div>
+    </div>
+    <div id="auth-alert"></div>
+
+    <!-- Login Form -->
+    <div id="login-form">
+      <h2 class="auth-title">Rider Sign In</h2>
+      <p class="auth-subtitle">Start accepting deliveries</p>
+      <form id="loginForm">
+        <div class="form-group">
+          <label class="form-label">Email</label>
+          <input type="email" id="loginEmail" class="form-control" required />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Password</label>
+          <input type="password" id="loginPassword" class="form-control" required />
+        </div>
+        <button type="submit" class="btn btn-primary btn-full btn-lg">Sign In</button>
+      </form>
+      <p class="mt-md text-sm text-muted" style="text-align:center">
+        New rider? <a href="#" id="showRegister">Apply to join</a>
+      </p>
+    </div>
+
+    <!-- Register Form -->
+    <div id="register-form" class="hidden">
+      <h2 class="auth-title">Join as Rider</h2>
+      <p class="auth-subtitle">Earn by delivering orders across Lagos</p>
+      <form id="registerForm">
+        <div class="flex gap-sm">
+          <div class="form-group" style="flex:1">
+            <label class="form-label">First name</label>
+            <input type="text" id="regFirst" class="form-control" required />
+          </div>
+          <div class="form-group" style="flex:1">
+            <label class="form-label">Last name</label>
+            <input type="text" id="regLast" class="form-control" required />
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Email</label>
+          <input type="email" id="regEmail" class="form-control" required />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Phone number</label>
+          <input type="tel" id="regPhone" class="form-control" placeholder="+2348012345678" required />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Password</label>
+          <input type="password" id="regPassword" class="form-control" placeholder="Min. 8 chars, 1 uppercase, 1 number" required />
+        </div>
+        <button type="submit" class="btn btn-primary btn-full btn-lg">Create Account</button>
+      </form>
+      <p class="mt-md text-sm text-muted" style="text-align:center">
+        Already registered? <a href="#" id="showLogin">Sign in</a>
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- Profile Setup (shown after first login when no profile exists) -->
+<div id="profile-setup" class="auth-page hidden">
+  <div class="auth-card" style="max-width:500px">
+    <div class="auth-logo">
+      <img src="../shared/img/logo.svg" class="auth-logo-img" alt="AVDAN" />
+      <div class="tagline">Complete Your Rider Profile</div>
+    </div>
+    <p class="auth-subtitle" style="text-align:center;margin-bottom:var(--space-md)">
+      Tell us about your vehicle so we can assign deliveries to you.
+    </p>
+    <div id="setup-alert"></div>
+    <form id="profileSetupForm">
+      <div class="form-group">
+        <label class="form-label">Vehicle Type</label>
+        <select id="setupVType" class="form-control">
+          <option value="motorcycle">Motorcycle</option>
+          <option value="bicycle">Bicycle</option>
+          <option value="car">Car</option>
+          <option value="van">Van</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Plate Number <span class="text-muted">(optional)</span></label>
+        <input type="text" id="setupPlate" class="form-control" placeholder="e.g. LND-001-AA" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Bank Account Number <span class="text-muted">(optional — for payouts)</span></label>
+        <input type="text" id="setupBankAcc" class="form-control" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Bank Code <span class="text-muted">(optional)</span></label>
+        <input type="text" id="setupBankCode" class="form-control" placeholder="e.g. 058 for GTBank" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Bank Name <span class="text-muted">(optional)</span></label>
+        <input type="text" id="setupBankName" class="form-control" />
+      </div>
+      <button type="submit" class="btn btn-primary btn-full btn-lg">Save &amp; Continue</button>
+    </form>
+    <p class="mt-md text-sm text-muted" style="text-align:center">
+      You can update these details anytime from your Profile page.
+    </p>
+  </div>
+</div>
+
+<!-- App Shell -->
+<div id="app" class="app-shell hidden">
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <div>
+        <img src="../shared/img/logo.svg" class="sidebar-logo-img" alt="AVDAN" />
+        <div class="role-badge">Rider</div>
+      </div>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-section-title">Deliveries</div>
+      <button class="nav-item active" data-page="page-dashboard" onclick="navigate('page-dashboard')"><span class="icon">🏠</span> Dashboard</button>
+      <button class="nav-item" data-page="page-current" onclick="loadCurrentOrder(); navigate('page-current')"><span class="icon">🚀</span> Current Order</button>
+      <button class="nav-item" data-page="page-history" onclick="loadHistory(); navigate('page-history')"><span class="icon">📋</span> History</button>
+      <div class="nav-section-title">Finance</div>
+      <button class="nav-item" data-page="page-wallet" onclick="loadWallet(); navigate('page-wallet')"><span class="icon">💰</span> Earnings</button>
+      <div class="nav-section-title">Account</div>
+      <button class="nav-item" data-page="page-profile" onclick="loadProfile(); navigate('page-profile')"><span class="icon">👤</span> Profile</button>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="sidebar-user">
+        <div class="avatar" id="user-avatar">R</div>
+        <div>
+          <div class="name" id="user-name">Loading…</div>
+          <div class="email" id="user-email"></div>
+        </div>
+      </div>
+      <button class="btn btn-ghost btn-sm btn-full mt-md" onclick="logout()">Sign out</button>
+    </div>
+  </aside>
+
+  <main class="main-content">
+    <header class="topbar">
+      <button class="sidebar-toggle" onclick="toggleSidebar()" aria-label="Toggle sidebar">
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+          <line x1="3" y1="5" x2="17" y2="5"/><line x1="3" y1="10" x2="17" y2="10"/><line x1="3" y1="15" x2="17" y2="15"/>
+        </svg>
+      </button>
+      <span class="topbar-title" id="topbar-title">Dashboard</span>
+      <div class="topbar-actions">
+        <button id="availabilityBtn" class="btn btn-sm" onclick="toggleAvailability()">⏵ Go Online</button>
+      </div>
+    </header>
+
+    <!-- Dashboard -->
+    <section id="page-dashboard" class="page active">
+      <div class="page-header"><h1 class="page-title">Rider Dashboard</h1></div>
+      <div id="approval-banner"></div>
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-icon">🚴</div>
+          <div class="stat-value" id="stat-deliveries">—</div>
+          <div class="stat-label">Total Deliveries</div>
+        </div>
+        <div class="stat-card blue">
+          <div class="stat-icon" style="background:rgba(37,99,235,.1)">💰</div>
+          <div class="stat-value" id="stat-balance">—</div>
+          <div class="stat-label">Wallet Balance</div>
+        </div>
+        <div class="stat-card green">
+          <div class="stat-icon" style="background:rgba(22,163,74,.1)">⭐</div>
+          <div class="stat-value" id="stat-rating">—</div>
+          <div class="stat-label">Rating</div>
+        </div>
+        <div class="stat-card amber">
+          <div class="stat-icon" style="background:rgba(217,119,6,.1)">📍</div>
+          <div class="stat-value" id="stat-status">—</div>
+          <div class="stat-label">Current Status</div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header"><span class="card-title">Active Assignment</span></div>
+        <div id="active-assignment">
+          <div class="empty-state"><div class="icon">🚗</div><h3>No active delivery</h3><p>Go online to receive delivery assignments</p></div>
+        </div>
+      </div>
+      <div id="live-map-card" class="card mt-md hidden">
+        <div class="card-header"><span class="card-title">Live Map</span></div>
+        <div id="rider-map"></div>
+      </div>
+    </section>
+
+    <!-- Current Order -->
+    <section id="page-current" class="page">
+      <div class="page-header"><h1 class="page-title">Current Order</h1></div>
+      <div id="current-order-detail"><div class="spinner"></div></div>
+    </section>
+
+    <!-- History -->
+    <section id="page-history" class="page">
+      <div class="page-header"><h1 class="page-title">Delivery History</h1></div>
+      <div id="history-list"><div class="spinner"></div></div>
+    </section>
+
+    <!-- Wallet -->
+    <section id="page-wallet" class="page">
+      <div class="page-header"><h1 class="page-title">Earnings & Wallet</h1></div>
+      <div id="wallet-details"><div class="spinner"></div></div>
+    </section>
+
+    <!-- Profile -->
+    <section id="page-profile" class="page">
+      <div class="page-header"><h1 class="page-title">My Profile</h1></div>
+      <div id="profile-details"><div class="spinner"></div></div>
+    </section>
+  </main>
+</div>
+
+<div class="sidebar-backdrop" id="sidebar-backdrop"></div>
+<script src="../shared/js/api.js"></script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="js/app.js"></script>
+<script src="../shared/js/sidebar.js"></script>
+</body>
+</html>

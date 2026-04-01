@@ -1,0 +1,38 @@
+/* Vendor Dashboard specific styles */
+.product-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  padding: var(--space-md);
+  border-bottom: 1px solid var(--color-border);
+}
+.product-row:last-child { border-bottom: none; }
+.product-row-img {
+  width: 60px; height: 60px;
+  background: var(--color-bg);
+  border-radius: var(--radius-md);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 28px;
+  flex-shrink: 0;
+  overflow: hidden;
+}
+.product-row-img img { width: 100%; height: 100%; object-fit: cover; }
+.product-row-name { font-weight: 600; }
+.product-row-category { font-size: var(--text-xs); color: var(--color-muted); text-transform: uppercase; }
+.product-row-price { font-size: var(--text-lg); font-weight: 700; color: var(--color-primary); }
+.product-row-actions { margin-left: auto; display: flex; gap: var(--space-sm); }
+
+.order-row {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-md) var(--space-lg);
+  margin-bottom: var(--space-md);
+}
+.order-actions { display: flex; gap: var(--space-sm); flex-wrap: wrap; margin-top: var(--space-md); }
+
+/* New (PAID) orders get a highlighted border */
+.order-row-new {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(232,74,28,.10);
+}

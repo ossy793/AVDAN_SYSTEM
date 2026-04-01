@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220 64" width="220" height="64">
+  <rect width="220" height="64" rx="10" fill="#1E40AF"/>
+  <!-- A chevron mark -->
+  <polygon points="40,52 56,16 64,36 56,36 56,44 48,44 48,36 40,36" fill="#F97316"/>
+  <polygon points="72,52 56,16 64,36 72,36" fill="#FB923C" opacity="0.7"/>
+  <!-- Wordmark -->
+  <text x="82" y="44" font-family="Arial Black, sans-serif" font-size="28" font-weight="900" fill="#FFFFFF" letter-spacing="1">AVDAN</text>
+</svg>

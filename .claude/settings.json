@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(find /c/Users/hp/Desktop/ADVAN2 -type f \\\\\\(-name *.py -o -name *.js -o -name *.css -o -name *.html \\\\\\))",
+      "Bash(python -c \":*)",
+      "Bash(venvScriptspython.exe -c \":*)",
+      "Bash(ls \"c:\\\\Users\\\\hp\\\\Desktop\\\\ADVAN2\\\\backend\\\\venv\\\\Scripts\"\" 2>/dev/null || ls \"c:UsershpDesktopADVAN2backendvenvbin\"\")",
+      "Bash(python -m pip show bcrypt)",
+      "Bash(where python:*)",
+      "Bash(python -c \"import bcrypt; print\\(''''bcrypt ok''''\\)\")"
+    ]
+  }
+}
