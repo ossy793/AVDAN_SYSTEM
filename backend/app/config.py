@@ -49,7 +49,18 @@ class Settings(BaseSettings):
     MAX_UPLOAD_SIZE_MB: int = 5
 
     # ── CORS ───────────────────────────────────────────────────────────────
-    ALLOWED_ORIGINS: List[str] = ["*"]
+    ALLOWED_ORIGINS: List[str] = [
+        "http://localhost:8000",
+        "http://127.0.0.1:8000",
+        "http://localhost:5500",
+        "http://127.0.0.1:5500",
+        "https://avdan-system.vercel.app",
+        "https://avdan-system-9ksg.vercel.app",
+        "https://avdan-admin.vercel.app",
+        "https://avdan-vendor.vercel.app",
+        "https://avdan-riders.vercel.app",
+        "https://avdan-agent.vercel.app",
+    ]
 
     # ── Notification Providers (abstract hooks) ────────────────────────────
     SMS_PROVIDER_API_KEY: str = ""
