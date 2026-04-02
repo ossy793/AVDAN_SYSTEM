@@ -555,22 +555,119 @@ tbody tr:hover td { background: rgba(232,74,28,.02); }
 .topbar { gap: var(--space-sm); }
 .topbar-title { flex: 1; }
 
-/* ── Responsive ─────────────────────────────────────────────── */
+/* ═══════════════════════════════════════════════════════════════
+   RESPONSIVE SYSTEM — mobile-first, 3 breakpoints
+   ─────────────────────────────────────────────────────────────
+   640px  — large mobile / landscape
+   768px  — tablet portrait
+   1024px — tablet landscape / small laptop
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ── Table: always scrollable, touch-friendly ────────────────── */
+.table-wrap {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  border-radius: var(--radius-lg);
+}
+
+/* ── Map: responsive height ──────────────────────────────────── */
+#map { width: 100%; height: min(400px, 50vh); border-radius: var(--radius-lg); z-index: 1; }
+
+/* ══════════════ 1024px — tablet landscape ═══════════════════ */
+@media (max-width: 1024px) {
+  :root { --sidebar-w: 220px; }
+  .stats-grid { grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); }
+}
+
+/* ══════════════ 768px — tablet portrait ════════════════════ */
 @media (max-width: 768px) {
-  /* On mobile, sidebar is always an overlay — no margin shift */
+  /* Sidebar becomes a full overlay — zero-width gap in content */
   .main-content,
   .app-shell.sidebar-hidden .main-content { margin-left: 0 !important; }
 
-  /* Sidebar adds a shadow when open on mobile */
-  .app-shell:not(.sidebar-hidden) .sidebar { box-shadow: var(--shadow-lg); }
+  /* When sidebar is open on mobile, it floats above content */
+  .app-shell:not(.sidebar-hidden) .sidebar {
+    box-shadow: var(--shadow-lg);
+  }
 
+  .topbar { padding: 0 var(--space-md); }
+  .page   { padding: var(--space-md); }
   .stats-grid { grid-template-columns: 1fr 1fr; }
-  .page { padding: var(--space-md); }
+  .card   { padding: var(--space-md); }
+
+  /* Modal: near full-screen on tablet */
+  .modal {
+    max-width: 95vw;
+    padding: var(--space-lg);
+    margin: var(--space-sm) auto;
+  }
+  .modal-overlay { padding: var(--space-sm); }
+
+  /* Auth card */
+  .auth-card { padding: var(--space-xl) var(--space-lg); }
+
+  /* Page header stacks on tablet */
+  .page-header { flex-direction: column; align-items: flex-start; }
+  .page-header .btn { width: 100%; justify-content: center; }
+
+  /* Table cards on tablet: min readable width */
+  .table-wrap table { min-width: 600px; }
 }
 
+/* ══════════════ 640px — large mobile ════════════════════════ */
+@media (max-width: 640px) {
+  :root {
+    --text-2xl: 22px;
+    --text-3xl: 26px;
+    --text-xl:  18px;
+  }
+
+  .stats-grid { grid-template-columns: 1fr 1fr; gap: var(--space-sm); }
+  .stat-card  { padding: var(--space-md); }
+  .stat-value { font-size: var(--text-xl); }
+
+  .topbar-title { font-size: var(--text-base); }
+  .topbar-actions .btn-ghost { display: none; } /* hide less-critical topbar buttons */
+
+  /* Auth card full-width */
+  .auth-card {
+    padding: var(--space-lg) var(--space-md);
+    border-radius: var(--radius-lg);
+  }
+  .auth-title { font-size: var(--text-xl); }
+
+  /* Modal: full-width with minimal padding */
+  .modal { padding: var(--space-md); border-radius: var(--radius-lg); }
+  .modal-footer { flex-direction: column-reverse; }
+  .modal-footer .btn { width: 100%; justify-content: center; }
+
+  /* Buttons: min 44px height for touch targets */
+  .btn { min-height: 44px; }
+  .btn-sm { min-height: 36px; }
+
+  /* Card header: stack on mobile */
+  .card-header { flex-direction: column; align-items: flex-start; gap: var(--space-sm); }
+  .card-header .btn { width: 100%; justify-content: center; }
+
+  /* Tables: horizontal scroll */
+  .table-wrap table { min-width: 520px; }
+  thead th, tbody td { padding: 10px 12px; }
+}
+
+/* ══════════════ 480px — small mobile ════════════════════════ */
 @media (max-width: 480px) {
   .stats-grid { grid-template-columns: 1fr; }
-  .page-header { flex-direction: column; align-items: flex-start; }
+  .page       { padding: var(--space-sm) var(--space-md); }
+
+  /* Stack flex name-value rows */
+  .flex.gap-sm { flex-direction: column; gap: var(--space-xs); }
+
+  /* Larger touch targets for nav */
+  .nav-item { padding: 14px var(--space-md); }
+
+  /* Empty state more compact */
+  .empty-state { padding: var(--space-xl) var(--space-md); }
+  .empty-state .icon { font-size: 36px; }
 }
 
 /* ── Utilities ──────────────────────────────────────────────── */

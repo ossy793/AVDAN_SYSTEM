@@ -36,3 +36,12 @@
   border-color: var(--color-primary);
   box-shadow: 0 0 0 3px rgba(232,74,28,.10);
 }
+
+/* ── Vendor Responsive ──────────────────────────────────────────── */
+@media (max-width: 640px) {
+  .product-row { flex-wrap: wrap; gap: var(--space-sm); }
+  .product-row-img { width: 48px; height: 48px; font-size: 22px; }
+  .product-row-actions { margin-left: 0; width: 100%; justify-content: flex-end; }
+  .order-row { padding: var(--space-md); }
+  .order-actions .btn { flex: 1; min-width: 0; font-size: var(--text-xs); }
+}

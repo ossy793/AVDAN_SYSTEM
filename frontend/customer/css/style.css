@@ -197,6 +197,29 @@
 .wallet-balance-amount { font-size: 40px; font-weight: 900; letter-spacing: -1px; }
 .wallet-currency { font-size: var(--text-lg); font-weight: 400; margin-right: 4px; }
 
+/* ── Customer Responsive ────────────────────────────────────────── */
+@media (max-width: 640px) {
+  /* Product grid: 2 cols on mobile */
+  .products-grid { grid-template-columns: repeat(2, 1fr); gap: var(--space-sm); }
+  .product-image { height: 120px; font-size: 36px; }
+  .product-price { font-size: var(--text-lg); }
+
+  /* Wallet: shrink giant balance number */
+  .wallet-balance-amount { font-size: clamp(28px, 9vw, 40px); }
+  .wallet-balance-card   { padding: var(--space-lg); }
+
+  /* Cart: stack info on very small screens */
+  .cart-item { flex-wrap: wrap; gap: var(--space-sm); }
+  .cart-item-subtotal { margin-left: 0; }
+
+  /* Delivery map: shorter on small phones */
+  .delivery-map-container { height: min(200px, 35vh); }
+}
+
+@media (max-width: 400px) {
+  .products-grid { grid-template-columns: 1fr; }
+}
+
 /* ── Delivery Location Map ─────────────────────────────────────── */
 .location-search-wrap {
   position: relative;

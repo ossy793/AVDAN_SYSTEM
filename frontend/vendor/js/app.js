@@ -560,3 +560,32 @@ window.navigate = function(pageId) {
   };
   document.getElementById('topbar-title').textContent = map[pageId] || 'ADVAN Vendor';
 };
+
+
+// ── Sidebar: responsive toggle ────────────────────────────────────────────────
+function toggleSidebar() {
+  const shell  = document.getElementById("app");
+  const bd     = document.getElementById("sidebar-backdrop");
+  const isOpen = !shell.classList.contains("sidebar-hidden");
+  shell.classList.toggle("sidebar-hidden", isOpen);
+  bd?.classList.toggle("visible", !isOpen);
+}
+
+function closeSidebar() {
+  const shell = document.getElementById("app");
+  const bd    = document.getElementById("sidebar-backdrop");
+  shell.classList.add("sidebar-hidden");
+  bd?.classList.remove("visible");
+}
+
+// On mobile: start with sidebar hidden; close on nav-item click
+(function _sidebarInit() {
+  if (window.innerWidth <= 768) {
+    document.getElementById("app")?.classList.add("sidebar-hidden");
+  }
+  document.querySelectorAll(".nav-item").forEach(el => {
+    el.addEventListener("click", () => {
+      if (window.innerWidth <= 768) closeSidebar();
+    });
+  });
+})();

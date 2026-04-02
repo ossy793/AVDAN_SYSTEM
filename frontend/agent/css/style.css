@@ -43,6 +43,14 @@
   margin-bottom: 8px;
   max-width: 80%;
   font-size: var(--text-sm);
+  word-break: break-word;
 }
 .message-sent { background: var(--color-primary); color: #fff; margin-left: auto; }
 .message-received { background: var(--color-bg); }
+
+/* ── Agent Responsive ──────────────────────────────────────────── */
+@media (max-width: 640px) {
+  .message-bubble { max-width: 90%; padding: 8px 12px; }
+  .package-header { gap: 6px; }
+  .package-actions .btn { flex: 1; min-width: 0; font-size: var(--text-xs); }
+}

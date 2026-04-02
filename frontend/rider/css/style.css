@@ -1,5 +1,5 @@
 /* Rider App styles */
-#rider-map { width:100%; height:360px; border-radius:var(--radius-lg); z-index:1; }
+#rider-map { width:100%; height: min(360px, 45vh); border-radius:var(--radius-lg); z-index:1; }
 
 .delivery-card {
   background: linear-gradient(135deg, var(--color-primary), var(--color-primary-dk));
@@ -38,6 +38,16 @@
   display: flex; align-items: center; justify-content: center;
   font-size: 22px;
   flex-shrink: 0;
+}
+
+/* ── Rider Responsive ──────────────────────────────────────────── */
+@media (max-width: 640px) {
+  .delivery-card { padding: var(--space-lg); }
+  .delivery-address { font-size: var(--text-base); }
+  .delivery-actions { gap: var(--space-xs); }
+  .delivery-actions .btn { flex: 1; min-width: 0; font-size: var(--text-xs); padding: 10px 8px; }
+  .history-item { flex-wrap: wrap; }
+  .history-icon { width: 36px; height: 36px; font-size: 18px; }
 }
 
 .online-indicator {
