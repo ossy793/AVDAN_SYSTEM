@@ -43,8 +43,18 @@ const api = (() => {
 
     let response;
     try {
-      response = await fetch(url, options);
+      // Allow up to 60s for cold-start wakeup on free hosting tiers
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), 60000);
+      try {
+        response = await fetch(url, { ...options, signal: controller.signal });
+      } finally {
+        clearTimeout(timer);
+      }
     } catch (err) {
+      if (err.name === 'AbortError') {
+        throw new ApiError(0, 'Request timed out. The server may be waking up — please try again.');
+      }
       throw new ApiError(0, 'Network error. Please check your connection.');
     }
 
